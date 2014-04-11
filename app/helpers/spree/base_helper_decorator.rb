@@ -1,11 +1,15 @@
 module Spree
   BaseHelper.class_eval do
-    alias_method :original_breadcrumbs, :breadcrumbs
-    alias_method :original_taxons_tree, :taxons_tree
-    alias_method :original_seo_url, :seo_url
+    alias_method :original_breadcrumbs, :breadcrumbs unless method_defined?(:original_breadcrumbs)
+    alias_method :original_taxons_tree, :taxons_tree unless method_defined?(:original_taxons_tree)
+    alias_method :original_seo_url, :seo_url  unless method_defined?(:original_seo_url)
 
     def current_taxons
-      @taxons || []
+      @selected_taxons || []
+    end
+
+    def taxon_title_text
+      current_taxons.collect {|t| t.name}.join(', ').html_safe
     end
 
     def breadcrumbs(taxon, separator="&nbsp;&raquo;&nbsp;")
@@ -15,16 +19,14 @@ module Spree
 
       return "" if current_page?("/") || taxon.nil?
       separator = raw(separator)
-      crumbs = [content_tag(:li, link_to(Spree.t(:home), spree.root_path) + separator)]
+      crumbs = [content_tag(:li, link_to(Spree.t(:home), spree.root_path))]
       if taxon
-        crumbs << content_tag(:li, link_to(Spree.t(:products), products_path) + separator)
-        crumbs << taxon.ancestors.collect { |ancestor| content_tag(:li, link_to(ancestor.name , seo_url(ancestor)) + separator) } unless taxon.ancestors.empty?
-        #crumbs << content_tag(:li, content_tag(:span, link_to(taxon.name , seo_url(taxon))))
-        crumbs << current_taxons.collect { |ancestor| content_tag(:li, link_to(ancestor.name , seo_url(ancestor)) + separator) } unless taxon.ancestors.empty?
+        crumbs << content_tag(:li, link_to(Spree.t(:products), products_path))
+        crumbs << current_taxons.collect { |t| content_tag(:li, link_to(t.name, seo_url(t))) } unless current_taxons.empty?
       else
         crumbs << content_tag(:li, content_tag(:span, Spree.t(:products)))
       end
-      crumb_list = content_tag(:ul, raw(crumbs.flatten.map{|li| li.mb_chars}.join), class: 'inline')
+      crumb_list = content_tag(:ul, raw(crumbs.flatten.map{|li| li.mb_chars}.join(separator)), class: 'inline')
       content_tag(:nav, crumb_list, id: 'breadcrumbs', class: 'sixteen columns')
     end
 

@@ -6,7 +6,7 @@ module Spree
     #
     #   Spree::Product.taxons_id_eq([x,y])
     add_search_scope :in_all_taxons do |*taxons|
-      taxons = get_taxons(taxons)
+      taxons = get_taxons(taxons) 
       taxons.first ? prepare_all_taxon_conditions(taxons) : scoped
     end
 

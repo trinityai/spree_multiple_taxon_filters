@@ -3,8 +3,8 @@ module Spree
     module Search
       Base.class_eval do
         protected
-          alias_method :original_get_base_scope, :get_base_scope
-          alias_method :original_prepare, :prepare
+          alias_method :original_get_base_scope, :get_base_scope unless method_defined?(:original_get_base_scope)
+          alias_method :original_prepare, :prepare unless method_defined?(:original_prepare)
 
           def get_base_scope
             base_scope = Spree::Product.active
